@@ -1,15 +1,10 @@
 const express = require('express');
+const routes = require('./routes');
 
 const logger = require('./utils/logger');
 
 // Database
 const database = require('./database');
-
-const app = express();
-
-// Bodyparser Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 
 // Testing the connection to Database by trying to authenticate
 database
@@ -20,6 +15,15 @@ database
   .catch(err => {
     logger.error(`Unable to connect to the database: ${err}`);
   });
+
+const app = express();
+
+// Bodyparser Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+// Routes Middleware
+app.use('/', routes);
 
 const port = process.env.PORT || 5000;
 
