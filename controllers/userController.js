@@ -1,9 +1,11 @@
 const User = require('../models/User');
+const Post = require('../models/Post');
+const Comment = require('../models/Comment');
 const { Op } = require('sequelize');
 const encryptionHelper = require('../services/encryptionHelper');
 
 module.exports = {
-  getAll: async (req, res) => {
+  getAllUsers: async (req, res) => {
     try {
       let users = await User.findAll({
         attributes: ['id', 'name', 'username', 'email']
@@ -18,7 +20,7 @@ module.exports = {
     }
   },
 
-  getByID: async (req, res) => {
+  getUserByID: async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -35,7 +37,93 @@ module.exports = {
     }
   },
 
-  register: async (req, res) => {
+  getAllUserPosts: async (req, res) => {
+    const { id } = req.params;
+
+    try {
+      let posts = await Post.findAll({
+        where: { user_id: id }
+      });
+
+      if (posts.length === 0) {
+        return res.status(404).json({
+          msg: 'no posts founded'
+        });
+      }
+
+      res.json(posts);
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  getUserPostByID: async (req, res) => {
+    const { id, post_id } = req.params;
+
+    try {
+      let post = await Post.findOne({
+        where: {
+          id: post_id,
+          user_id: id
+        }
+      });
+
+      if (!post) {
+        return res.status(404).json({
+          msg: 'post not found'
+        });
+      }
+
+      res.json(post);
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  getAllUserComents: async (req, res) => {
+    const { id } = req.params;
+
+    try {
+      let comments = await Comment.findAll({
+        where: { user_id: id }
+      });
+
+      if (comments.length === 0) {
+        return res.status(404).json({
+          msg: 'no comments founded'
+        });
+      }
+
+      res.json(comments);
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  getUserCommentByID: async (req, res) => {
+    const { id, comment_id } = req.params;
+
+    try {
+      let comment = await Comment.findOne({
+        where: {
+          id: comment_id,
+          user_id: id
+        }
+      });
+
+      if (!comment) {
+        return res.status(404).json({
+          msg: 'comment not found'
+        });
+      }
+
+      res.json(comment);
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  registerUser: async (req, res) => {
     const newUser = ({ name, username, email, password } = req.body);
     //const newUser = {name, user, email, password}:
     console.log(newUser);
@@ -62,7 +150,7 @@ module.exports = {
     }
   },
 
-  delete: async (req, res) => {
+  deleteUser: async (req, res) => {
     const { id } = req.params;
 
     try {
