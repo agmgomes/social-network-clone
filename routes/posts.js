@@ -1,7 +1,11 @@
 const router = require('express').Router();
 
 const { postController } = require('../controllers');
-const { postValidator, commentValidator } = require('../validators');
+const {
+  postValidator,
+  commentValidator,
+  authValidator
+} = require('../validators');
 
 /**
  * GET /posts/
@@ -20,22 +24,37 @@ router.get('/:id', postController.getPostByID);
 /**
  * POST /posts/
  * desc Submit a post
- * access Public
+ * access Authorized User
  */
-router.post('/', postValidator.submitPost, postController.submitPost);
+router.post(
+  '/',
+  postValidator.submitPost,
+  authValidator.validateToken,
+  postController.submitPost
+);
 
 /**
  * POST /posts/:post_id/comments
  * desc Submit a comment on a post
- * access Public
+ * access Authorized User
  */
-router.post('/:post_id/comments', postController.submitComment);
+router.post(
+  '/:post_id/comments',
+  commentValidator.submitComment,
+  authValidator.validateToken,
+  postController.submitComment
+);
 
 /**
  * PATCH /posts/id
  * desc Edit a post
- * access Public
+ * access Authorized User
  */
-router.patch('/:id', postController.editPostByID);
+router.patch(
+  '/:id',
+  postValidator.submitPost,
+  authValidator.validateToken,
+  postController.editPostByID
+);
 
 module.exports = router;

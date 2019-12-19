@@ -1,6 +1,7 @@
 const router = require('express').Router();
 
 const { commentController } = require('../controllers');
+const { commentValidator, authValidator } = require('../validators');
 
 /**
  * GET /comments/
@@ -21,7 +22,12 @@ router.get('/:id', commentController.getCommentByID);
  * desc Edit a comment
  * access Public
  */
-router.patch('/:id', commentController.editCommentByID);
+router.patch(
+  '/:id',
+  commentValidator.submitComment,
+  authValidator.validateToken,
+  commentController.editCommentByID
+);
 
 /**
  * DELETE /comments/:id
