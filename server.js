@@ -1,4 +1,5 @@
 const express = require('express');
+const bearerToken = require('express-bearer-token');
 const routes = require('./routes');
 const { validationErrorHandler } = require('./middlewares');
 
@@ -22,6 +23,9 @@ const app = express();
 // Bodyparser Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Bearer Token Middleware
+app.use(bearerToken());
 
 // Routes Middleware
 app.use('/', routes);
