@@ -24,7 +24,7 @@ module.exports = {
       let decoded = jwt.verify(token, process.env.JWT_SECRET);
       return decoded;
     } catch (error) {
-      console.log(error);
+      return false;
     }
   }
 };
