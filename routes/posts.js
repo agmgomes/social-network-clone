@@ -1,6 +1,7 @@
 const router = require('express').Router();
 
-const postController = require('../controllers/postController');
+const { postController } = require('../controllers');
+const { postValidator, commentValidator } = require('../validators');
 
 /**
  * GET /posts/
@@ -21,7 +22,7 @@ router.get('/:id', postController.getPostByID);
  * desc Submit a post
  * access Public
  */
-router.post('/', postController.submitPost);
+router.post('/', postValidator.submitPost, postController.submitPost);
 
 /**
  * POST /posts/:post_id/comments

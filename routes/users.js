@@ -1,6 +1,7 @@
 const router = require('express').Router();
 
-const userController = require('../controllers/userController');
+const { userController } = require('../controllers');
+const { userValidator } = require('../validators');
 
 /**
  * route GET /users/
@@ -49,7 +50,7 @@ router.get('/:id/comments/:comment_id', userController.getUserCommentByID);
  * desc Register a new user
  * access Public
  */
-router.post('/', userController.registerUser);
+router.post('/', userValidator.register, userController.registerUser);
 
 /**
  * route DELETE /users/:id
