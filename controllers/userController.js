@@ -1,6 +1,6 @@
 const { User, Post, Comment } = require('../models');
 const { Op } = require('sequelize');
-const encryptionHelper = require('../services/encryptionHelper');
+const { encryptionHelper } = require('../services');
 
 module.exports = {
   getAllUsers: async (req, res) => {
@@ -123,8 +123,6 @@ module.exports = {
 
   registerUser: async (req, res) => {
     const newUser = ({ name, username, email, password } = req.body);
-    //const newUser = {name, user, email, password}:
-    console.log(newUser);
 
     try {
       let user = await User.findOne({
@@ -139,7 +137,6 @@ module.exports = {
     }
 
     try {
-      // Hashing the password
       newUser.password = await encryptionHelper.hashPassword(password);
       let user = await User.create(newUser);
       res.json(user);

@@ -1,5 +1,4 @@
 const { Post, Comment } = require('../models');
-const encryptionHelper = require('../services/encryptionHelper');
 
 module.exports = {
   getAllPosts: async (req, res) => {
@@ -43,17 +42,8 @@ module.exports = {
 
   submitPost: async (req, res) => {
     const { title, content } = req.body;
+    const { user_id } = res.locals;
 
-    const { authorization } = req.headers;
-    let token = authorization.substr(7);
-    /**
-     * needs validation for token and req.body
-     * token needs to have a certain pattern of a jsonwebtoken
-     * and id from decoded needs to be an integer
-     */
-    let decoded = encryptionHelper.verifyToken(token);
-
-    const { user_id } = decoded;
     const newPost = { title, content, user_id };
 
     try {
@@ -68,12 +58,8 @@ module.exports = {
   submitComment: async (req, res) => {
     const { text } = req.body;
     const { post_id } = req.params;
-    const { authorization } = req.headers;
+    const { user_id } = res.locals;
 
-    let token = authorization.substr(7);
-    let decoded = encryptionHelper.verifyToken(token);
-
-    const { user_id } = decoded;
     const newComment = { text, user_id, post_id };
 
     try {
@@ -87,17 +73,7 @@ module.exports = {
   editPostByID: async (req, res) => {
     const { id } = req.params;
     const { title, content } = req.body;
-
-    const { authorization } = req.headers;
-    let token = authorization.substr(7);
-    /**
-     * needs validation for token and req.body
-     * token needs to have a certain pattern of a jsonwebtoken
-     * and id from decoded needs to be an integer
-     */
-    let decoded = encryptionHelper.verifyToken(token);
-
-    const { user_id } = decoded;
+    const { user_id } = res.locals;
 
     try {
       let post = await Post.findOne({

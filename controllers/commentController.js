@@ -1,5 +1,4 @@
 const { Comment } = require('../models');
-const encryptionHelper = require('../services/encryptionHelper');
 
 module.exports = {
   getAllComments: async (req, res) => {
@@ -38,12 +37,7 @@ module.exports = {
   editCommentByID: async (req, res) => {
     const { text } = req.body;
     const { id } = req.params;
-    const { authorization } = req.headers;
-
-    let token = authorization.substr(7);
-    let decoded = encryptionHelper.verifyToken(token);
-
-    const { user_id } = decoded;
+    const { user_id } = res.locals;
 
     try {
       let comment = await Comment.findOne({
