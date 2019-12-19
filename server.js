@@ -1,5 +1,6 @@
 const express = require('express');
 const routes = require('./routes');
+const { validationErrorHandler } = require('./middlewares');
 
 const logger = require('./utils/logger');
 
@@ -24,6 +25,14 @@ app.use(express.urlencoded({ extended: false }));
 
 // Routes Middleware
 app.use('/', routes);
+
+/**
+ * error middlewares
+ * validation error
+ * global error
+ */
+
+app.use(validationErrorHandler);
 
 const port = process.env.PORT || 5000;
 
