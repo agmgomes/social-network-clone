@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const { User } = require('../models');
 const encryptionHelper = require('../services/encryptionHelper');
 
 module.exports = {

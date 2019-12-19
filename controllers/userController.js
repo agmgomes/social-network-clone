@@ -1,6 +1,4 @@
-const User = require('../models/User');
-const Post = require('../models/Post');
-const Comment = require('../models/Comment');
+const { User, Post, Comment } = require('../models');
 const { Op } = require('sequelize');
 const encryptionHelper = require('../services/encryptionHelper');
 

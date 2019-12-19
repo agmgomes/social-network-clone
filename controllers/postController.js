@@ -1,5 +1,4 @@
-const Post = require('../models/Post');
-const Comment = require('../models/Comment');
+const { Post, Comment } = require('../models');
 const encryptionHelper = require('../services/encryptionHelper');
 
 module.exports = {
