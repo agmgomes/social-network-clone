@@ -34,6 +34,10 @@ router.patch(
  * desc Delete a comment
  * access Public
  */
-router.delete('/:id', commentController.deleteComment);
+router.delete(
+  '/:id',
+  authValidator.validateToken,
+  commentController.deleteComment
+);
 
 module.exports = router;
