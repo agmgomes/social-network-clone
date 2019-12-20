@@ -1,41 +1,37 @@
 const { User, Post, Comment } = require('../models');
 const { Op } = require('sequelize');
-const { encryptionHelper } = require('../services');
+const { encryptionHelper, responseSender } = require('../services');
 
 module.exports = {
-  getAllUsers: async (req, res) => {
+  getAllUsers: async (req, res, next) => {
     try {
       let users = await User.findAll({
         attributes: ['id', 'name', 'username', 'email']
       });
-      if (users.length === 0) throw error;
+      if (users.length === 0)
+        return responseSender.notFound(res, 'Users not found');
       res.json(users);
-    } catch (error) {
-      res.status(404).json({
-        msg: 'Users not found',
-        status: 404
-      });
+    } catch (err) {
+      return next(err);
     }
   },
 
-  getUserByID: async (req, res) => {
+  getUserByID: async (req, res, next) => {
     const { id } = req.params;
 
     try {
       let user = await User.findByPk(id, {
         attributes: ['id', 'name', 'username', 'email']
       });
-      if (!user) throw error;
+      if (!user) return responseSender.notFound(res, 'User not found');
+
       res.json(user);
-    } catch (error) {
-      res.status(404).json({
-        msg: 'User not found',
-        status: 404
-      });
+    } catch (err) {
+      return next(err);
     }
   },
 
-  getAllUserPosts: async (req, res) => {
+  getAllUserPosts: async (req, res, next) => {
     const { id } = req.params;
 
     try {
@@ -44,18 +40,16 @@ module.exports = {
       });
 
       if (posts.length === 0) {
-        return res.status(404).json({
-          msg: 'no posts founded'
-        });
+        return responseSender.notFound(res, 'Posts not found');
       }
 
       res.json(posts);
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      return next(err);
     }
   },
 
-  getUserPostByID: async (req, res) => {
+  getUserPostByID: async (req, res, next) => {
     const { id, post_id } = req.params;
 
     try {
@@ -67,18 +61,16 @@ module.exports = {
       });
 
       if (!post) {
-        return res.status(404).json({
-          msg: 'post not found'
-        });
+        return responseSender.notFound(res, 'Post not found');
       }
 
       res.json(post);
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      return next(err);
     }
   },
 
-  getAllUserComents: async (req, res) => {
+  getAllUserComents: async (req, res, next) => {
     const { id } = req.params;
 
     try {
@@ -87,18 +79,16 @@ module.exports = {
       });
 
       if (comments.length === 0) {
-        return res.status(404).json({
-          msg: 'no comments founded'
-        });
+        return responseSender.notFound(res, 'Comments not found');
       }
 
       res.json(comments);
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      return next(err);
     }
   },
 
-  getUserCommentByID: async (req, res) => {
+  getUserCommentByID: async (req, res, next) => {
     const { id, comment_id } = req.params;
 
     try {
@@ -110,53 +100,54 @@ module.exports = {
       });
 
       if (!comment) {
-        return res.status(404).json({
-          msg: 'comment not found'
-        });
+        return responseSender.notFound(res, 'Comment not found');
       }
 
       res.json(comment);
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      return next(err);
     }
   },
 
-  registerUser: async (req, res) => {
+  registerUser: async (req, res, next) => {
     const newUser = ({ name, username, email, password } = req.body);
 
     try {
       let user = await User.findOne({
         where: { [Op.or]: [{ username }, { email }] }
       });
-      if (user) throw error;
-    } catch (error) {
-      return res.status(404).json({
-        msg: 'Username/email already exists',
-        status: 404
-      });
+
+      if (user) {
+        return responseSender.conflict(res, 'Username/email already exists');
+      }
+    } catch (err) {
+      return next(err);
     }
 
     try {
       newUser.password = await encryptionHelper.hashPassword(password);
       let user = await User.create(newUser);
       res.json(user);
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      return next(err);
     }
   },
 
-  deleteUser: async (req, res) => {
+  deleteUser: async (req, res, next) => {
     const { id } = req.params;
 
     try {
-      let user = await User.findByPk(id);
-      await user.destroy();
-      res.sendStatus(204);
-    } catch (error) {
-      res.status(404).json({
-        msg: 'User not found',
-        error: 404
+      let deletedUser = await User.destroy({
+        where: { id }
       });
+
+      if (deletedUser) {
+        return responseSender.noContent(res);
+      }
+
+      return responseSender.notFound(res, 'User not found');
+    } catch (err) {
+      return next(err);
     }
   }
 };

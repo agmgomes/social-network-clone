@@ -1,7 +1,8 @@
 const { Comment } = require('../models');
+const { responseSender } = require('../services');
 
 module.exports = {
-  getAllComments: async (req, res) => {
+  getAllComments: async (req, res, next) => {
     try {
       let comments = await Comment.findAll({
         attributes: ['id', 'text'],
@@ -11,13 +12,17 @@ module.exports = {
         ]
       });
 
+      if (!comments) {
+        return responseSender.notFound(res, 'Comments not found');
+      }
+
       res.json(comments);
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      return next(err);
     }
   },
 
-  getCommentByID: async (req, res) => {
+  getCommentByID: async (req, res, next) => {
     const { id } = req.params;
     try {
       let comment = Comment.findByPk(id, {
@@ -28,13 +33,17 @@ module.exports = {
         ]
       });
 
+      if (!comment) {
+        return responseSender.notFound(res, 'Comment not found');
+      }
+
       res.json(comment);
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      return next(err);
     }
   },
 
-  editCommentByID: async (req, res) => {
+  editCommentByID: async (req, res, next) => {
     const { text } = req.body;
     const { id } = req.params;
     const { user_id } = res.locals;
@@ -44,24 +53,34 @@ module.exports = {
         where: { id, user_id }
       });
 
+      if (!comment) {
+        return responseSender.notFound(res, 'Comment not found');
+      }
+
       comment.update({
         text
       });
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      return next(err);
     }
   },
 
-  deleteComment: async (req, res) => {
+  deleteComment: async (req, res, next) => {
     const { id } = req.params;
+    const { user_id } = res.locals;
 
     try {
-      let commment = await Comment.findByPk(id);
-      await commment.destroy();
+      let deleteComment = await Comment.destroy({
+        where: { id, user_id }
+      });
 
-      res.sendStatus(204);
-    } catch (error) {
-      console.log(error);
+      if (deleteComment) {
+        return responseSender.noContent(res);
+      }
+
+      return responseSender.notFound(res, 'Comment not found');
+    } catch (err) {
+      return next(err);
     }
   }
 };

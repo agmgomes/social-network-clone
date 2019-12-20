@@ -1,7 +1,8 @@
 const { Post, Comment } = require('../models');
+const { responseSender } = require('../services');
 
 module.exports = {
-  getAllPosts: async (req, res) => {
+  getAllPosts: async (req, res, next) => {
     try {
       let posts = await Post.findAll({
         attributes: ['id', 'title', 'content'],
@@ -9,19 +10,16 @@ module.exports = {
           { association: 'user', attributes: ['id', 'name', 'username'] }
         ]
       });
-      if (posts.length === 0) throw error;
+      if (posts.length === 0) {
+        return responseSender.notFound(res, 'Posts not found');
+      }
       res.json(posts);
-    } catch (error) {
-      res.status(404).json({
-        error: {
-          msg: 'Posts not found',
-          status: 404
-        }
-      });
+    } catch (err) {
+      return next(err);
     }
   },
 
-  getPostByID: async (req, res) => {
+  getPostByID: async (req, res, next) => {
     const { id } = req.params;
 
     try {
@@ -29,18 +27,18 @@ module.exports = {
         attributes: ['id', 'title', 'content'],
         include: [{ association: 'user', attributes: ['id', 'username'] }]
       });
+
+      if (!post) {
+        return responseSender.notFound(res, 'Post not found');
+      }
+
       res.json(post);
-    } catch (error) {
-      res.status(404).json({
-        error: {
-          msg: 'Post not found - Invalid ID',
-          error: 404
-        }
-      });
+    } catch (err) {
+      return next(err);
     }
   },
 
-  submitPost: async (req, res) => {
+  submitPost: async (req, res, next) => {
     const { title, content } = req.body;
     const { user_id } = res.locals;
 
@@ -50,12 +48,12 @@ module.exports = {
       let post = await Post.create(newPost);
 
       res.json(post);
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      return next(err);
     }
   },
 
-  submitComment: async (req, res) => {
+  submitComment: async (req, res, next) => {
     const { text } = req.body;
     const { post_id } = req.params;
     const { user_id } = res.locals;
@@ -66,11 +64,11 @@ module.exports = {
       let comment = await Comment.create(newComment);
       res.json(comment);
     } catch (error) {
-      console.log(error);
+      return next(err);
     }
   },
 
-  editPostByID: async (req, res) => {
+  editPostByID: async (req, res, next) => {
     const { id } = req.params;
     const { title, content } = req.body;
     const { user_id } = res.locals;
@@ -80,14 +78,37 @@ module.exports = {
         where: { id, user_id }
       });
 
+      if (!post) {
+        return responseSender.notFound(res, 'Post not found');
+      }
+
       post.update({
         title,
         content
       });
 
       res.json(post);
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  deletePostByID: async (req, res, next) => {
+    const { id } = req.params;
+    const { user_id } = res.locals;
+
+    try {
+      let deletedPost = await Post.destroy({
+        where: { id, user_id }
+      });
+
+      if (deletedPost) {
+        return responseSender.noContent(res);
+      }
+
+      return responseSender.notFound(res, 'Post not found');
+    } catch (err) {
+      return next(err);
     }
   }
 };

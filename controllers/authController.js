@@ -1,39 +1,39 @@
 const { User } = require('../models');
-const encryptionHelper = require('../services/encryptionHelper');
+const { encryptionHelper, responseSender } = require('../services');
 
 module.exports = {
-  login: async (req, res) => {
+  login: async (req, res, next) => {
     const { username, password } = req.body;
 
     try {
       let user = await User.findOne({
         where: { username }
       });
-      if (!user)
-        return res.status(404).json({
-          msg: 'Username not found',
-          status: 404
-        });
+
+      if (!user) {
+        return responseSender.notFound(res, 'Wrong username');
+      }
 
       let isPasswordValid = await encryptionHelper.verifyPassword(
         password,
         user.password
       );
-      if (!isPasswordValid)
-        return res.status(400).json({
-          msg: 'Password incorrect',
-          status: 400
-        });
+
+      if (!isPasswordValid) {
+        return responseSender.badRequest(res, 'Wrong password');
+      }
 
       let token = encryptionHelper.assignToken(user.id);
-      let decoded = encryptionHelper.verifyToken(token);
 
+      /**
+       * implement responseSender for token
+       */
       return res.json({
-        token,
-        decoded
+        username: user.username,
+        token
       });
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      return next(err);
     }
   }
 };
