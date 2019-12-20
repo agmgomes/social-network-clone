@@ -1,7 +1,7 @@
 const express = require('express');
 const bearerToken = require('express-bearer-token');
 const routes = require('./routes');
-const { validationErrorHandler } = require('./middlewares');
+const { validationErrorHandler, globalErrorHandler } = require('./middlewares');
 
 const logger = require('./utils/logger');
 
@@ -37,6 +37,7 @@ app.use('/', routes);
  */
 
 app.use(validationErrorHandler);
+app.use(globalErrorHandler);
 
 const port = process.env.PORT || 5000;
 
