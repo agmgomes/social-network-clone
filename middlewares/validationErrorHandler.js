@@ -1,11 +1,11 @@
+const { responseSender } = require('../services/');
+const { isCelebrate } = require('celebrate');
+
 module.exports = validationErrorHandler = (err, req, res, next) => {
-  console.log('validationErrorHandler');
+  if (isCelebrate(err)) {
+    const { joi } = err;
 
-  const { joi } = err;
-
-  if (joi.isJoi) {
-    console.log(joi.details[0].context);
-    console.log(joi.details[0].message);
+    return responseSender.badRequest(res, joi.details[0].message);
   }
 
   return next(err);
