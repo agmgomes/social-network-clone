@@ -1,9 +1,13 @@
 const express = require('express');
 const bearerToken = require('express-bearer-token');
 const routes = require('./routes');
-const { validationErrorHandler, globalErrorHandler } = require('./middlewares');
+const {
+  validationErrorHandler,
+  globalErrorHandler,
+  httpLogger
+} = require('./middlewares');
 
-const logger = require('./utils/logger');
+const { logger } = require('./utils');
 
 // Database
 const database = require('./database');
@@ -24,6 +28,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// HTTP Logger Middleware
+app.use(httpLogger);
+
 // Bearer Token Middleware
 app.use(bearerToken());
 
@@ -31,11 +38,10 @@ app.use(bearerToken());
 app.use('/', routes);
 
 /**
- * error middlewares
- * validation error
- * global error
+ * Error Middlewares
+ *  Validation Error Handler
+ *  Global Error Handler
  */
-
 app.use(validationErrorHandler);
 app.use(globalErrorHandler);
 
