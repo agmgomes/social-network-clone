@@ -1,3 +1,3 @@
 # social-network-clone
 
-still in development
+TODO: README.md
